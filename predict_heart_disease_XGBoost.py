@@ -44,9 +44,25 @@ min_samples_split_list = [2,10, 30, 50, 100, 200, 300, 700] ## If the number is 
 max_depth_list = [1,2, 3, 4, 8, 16, 32, 64, None] # None means that there is no depth limit.
 n_estimators_list = [10,50,100,500]
 
+
+""" 
+One interesting thing about the XGBoost is that during fitting, it can take in an evaluation dataset of the form (X_val,y_val).
+
+On each iteration, it measures the cost (or evaluation metric) on the evaluation datasets.
+
+Once the cost (or metric) stops decreasing for a number of rounds (called early_stopping_rounds), the training will stop.
+
+More iterations lead to more estimators, and more estimators can result in overfitting.
+
+By stopping once the validation metric no longer improves, we can limit the number of estimators created, and reduce overfitting.
+
+First, let's define a subset of our training set (we should not use the test set here).
+"""
+
 n = int(len(X_train)*0.8) ## Let's use 80% to train and 20% to eval
 
 X_train_fit, X_train_eval, y_train_fit, y_train_eval = X_train[:n], X_train[n:], y_train[:n], y_train[n:]
+
 
 xgb_model = XGBClassifier(n_estimators = 500, learning_rate = 0.1, verbosity = 1, random_state = RANDOM_STATE, early_stopping_rounds = 10)
 xgb_model.fit(X_train_fit,y_train_fit, eval_set = [(X_train_eval,y_train_eval)])
